@@ -512,12 +512,12 @@ class EnhancedVoiceAssistant:
                 pass
             
             print(f"{Fore.YELLOW}❌ Could not understand the complete command{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}💡 Will switch to text mode for this command{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}💡 Going back to sleep mode{Style.RESET_ALL}")
             
             # Send voice failure notification
             self.send_notification(
                 "❌ Voice Recognition Failed", 
-                "Could not understand command.\nSwitching to text mode temporarily.",
+                "Could not understand command.\nGoing back to sleep mode.",
                 "dialog-warning",
                 "normal",
                 4000
@@ -531,19 +531,19 @@ class EnhancedVoiceAssistant:
                 
         except sr.WaitTimeoutError:
             print(f"{Fore.YELLOW}⏰ No speech detected within {timeout} seconds{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}💡 Switching to text mode for this command{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}💡 Going back to sleep mode{Style.RESET_ALL}")
             
             # Send timeout notification
             self.send_notification(
                 "⏰ Voice Timeout", 
-                "No speech detected within timeout.\nSwitching to text mode.",
+                "No speech detected within timeout.\nGoing back to sleep mode.",
                 "dialog-warning",
                 "normal",
                 4000
             )
             
             # Speak the timeout message
-            self.speak("No speech detected. Switching to text mode.")
+            self.speak("No speech detected. Going back to sleep.")
             
             return None
         except Exception as e:
@@ -787,75 +787,23 @@ class EnhancedVoiceAssistant:
             self.send_notification("❌ Info Error", "Couldn't get info", "dialog-error")
     
     def offer_text_fallback(self):
-        """Offer text input when voice recognition fails"""
-        print(f"\n{Fore.YELLOW}🔄 Voice recognition failed. Switching to text mode temporarily.{Style.RESET_ALL}")
+        """Handle voice recognition failure by returning to sleep mode (kept for compatibility)"""
+        print(f"\n{Fore.YELLOW}🔄 Voice recognition failed. Returning to sleep mode.{Style.RESET_ALL}")
         
-        # Send notification about fallback
+        # Send notification about failure
         self.send_notification(
-            "⌨️ Text Mode Fallback", 
-            "Voice recognition failed.\nTemporarily switching to text input.",
-            "input-keyboard",
+            "❌ Voice Recognition Failed", 
+            "Could not understand command.\nReturning to sleep mode.",
+            "dialog-warning",
             "normal",
-            5000
+            4000
         )
         
-        # Speak the fallback message
-        self.speak("Voice recognition failed. Please type your command.")
+        # Speak the failure message
+        self.speak("Voice recognition failed. Returning to sleep mode.")
         
-        print(f"{Fore.CYAN}📝 Type your command (or 'voice' to retry voice mode, 'quit' to exit):{Style.RESET_ALL}")
-        
-        try:
-            user_input = input(f"{Fore.BLUE}text> {Style.RESET_ALL}").strip()
-            
-            if user_input.lower() in ['quit', 'exit', 'q']:
-                self.speak("Goodbye!")
-                self.send_notification("👋 Enhanced Assistant Stopping", "Shutting down", "application-exit", "low", 3000)
-                self.is_running = False
-            elif user_input.lower() == 'voice':
-                print(f"{Fore.GREEN}🎤 Returning to voice mode...{Style.RESET_ALL}")
-                self.send_notification(
-                    "🎤 Voice Mode Restored", 
-                    "Returning to voice-first mode",
-                    "audio-input-microphone",
-                    "low",
-                    3000
-                )
-                return  # Return to voice loop
-            elif user_input.lower() == 'help':
-                self.show_enhanced_tips()
-                return self.offer_text_fallback()  # Ask again after showing tips
-            elif user_input.lower() == 'wake':
-                self.change_wake_word()
-                return self.offer_text_fallback()  # Ask again after changing wake word
-            elif user_input.lower() == 'recalibrate':
-                print(f"{Fore.YELLOW}🔄 Forcing voice recalibration...{Style.RESET_ALL}")
-                self.enhanced_calibration()
-                return  # Return to voice loop after recalibration
-            elif user_input:
-                print(f"{Fore.BLUE}📝 Processing text command: {user_input}{Style.RESET_ALL}")
-                self.process_command(user_input)
-                
-                # Ask if user wants to continue with text or return to voice
-                print(f"\n{Fore.CYAN}Continue with text mode? (y/n, default: return to voice): {Style.RESET_ALL}", end="")
-                continue_text = input().strip().lower()
-                
-                if continue_text == 'y' or continue_text == 'yes':
-                    print(f"{Fore.BLUE}📝 Staying in text mode{Style.RESET_ALL}")
-                    return self.text_mode_loop()  # Switch to persistent text mode
-                else:
-                    print(f"{Fore.GREEN}🎤 Returning to voice mode...{Style.RESET_ALL}")
-                    self.send_notification(
-                        "🎤 Voice Mode Restored", 
-                        "Returning to voice-first mode",
-                        "audio-input-microphone",
-                        "low",
-                        3000
-                    )
-            else:
-                print(f"{Fore.YELLOW}💡 Empty input, returning to voice mode{Style.RESET_ALL}")
-                
-        except KeyboardInterrupt:
-            print(f"\n{Fore.GREEN}🎤 Returning to voice mode...{Style.RESET_ALL}")
+        # Simply return - don't switch to text mode
+        return
     
     def text_mode_loop(self):
         """Persistent text mode with option to return to voice"""

@@ -78,6 +78,7 @@ class EnhancedVoiceAssistant:
             print(f"{Fore.GREEN}✅ Spotify connected{Style.RESET_ALL}")
             
         except Exception as e:
+            pass
             print(f"{Fore.RED}❌ Spotify setup failed: {e}{Style.RESET_ALL}")
             self.send_notification(
                 "❌ Spotify Error", 
@@ -524,7 +525,7 @@ class EnhancedVoiceAssistant:
             )  # Essential: notify on recognition failure
             
             # Speak the failure message
-            self.speak("Sorry, I couldn't understand that. Going back to sleep.")
+            # self.speak("Sorry, I couldn't understand that. Going back to sleep.")
             
             self.adjust_sensitivity()
             return None
@@ -543,7 +544,7 @@ class EnhancedVoiceAssistant:
             )  # Essential: notify on timeout
             
             # Speak the timeout message
-            self.speak("No speech detected. Going back to sleep.")
+            # self.speak("No speech detected. Going back to sleep.")
             
             return None
         except Exception as e:
@@ -579,7 +580,7 @@ class EnhancedVoiceAssistant:
                     
                     # Speak "yes sir" and wait for it to complete before returning
                     print(f"{Fore.CYAN}🤖 Acknowledging wake word...{Style.RESET_ALL}")
-                    self.speak("yes sir", wait=True)  # Synchronous - wait for completion
+                    # self.speak("yes sir", wait=True)  # Synchronous - wait for completion
                     print(f"{Fore.GREEN}✅ Ready for command after acknowledgment{Style.RESET_ALL}")
                     
                     return True
@@ -663,7 +664,7 @@ class EnhancedVoiceAssistant:
             elif any(word in command for word in ['what', 'playing', 'current', 'now']):
                 self.get_current_track()
             elif any(word in command for word in ['quit', 'exit', 'bye', 'goodbye']):
-                self.speak("Goodbye!")
+                # self.speak("Goodbye!")
                 self.send_notification(
                     "👋 Enhanced Assistant Stopping", 
                     "Enhanced Spotify Voice Assistant is shutting down",
@@ -673,11 +674,12 @@ class EnhancedVoiceAssistant:
                 )  # Essential: notify on shutdown
                 self.is_running = False
             else:
-                self.speak(f"I heard '{command}' but didn't understand the command. Try 'play [full song name]' or other basic commands.")
+                # self.speak(f"I heard '{command}' but didn't understand the command. Try 'play [full song name]' or other basic commands.")
+                pass
                 
         except Exception as e:
             print(f"{Fore.RED}Command processing error: {e}{Style.RESET_ALL}")
-            self.speak("Sorry, I had trouble processing that command.")
+            pass
     
     # Spotify control methods (same as before but with enhanced notifications)
     def play_song(self, song_name):
@@ -689,7 +691,7 @@ class EnhancedVoiceAssistant:
                 track = results['tracks']['items'][0]
                 self.spotify.start_playback(uris=[track['uri']])
                 message = f"Playing {track['name']} by {track['artists'][0]['name']}"
-                self.speak(message)
+                # self.speak(message)
                 
                 # Enhanced now playing notification
                 self.send_notification(
@@ -705,7 +707,7 @@ class EnhancedVoiceAssistant:
                     alternatives = [f"{t['name']} by {t['artists'][0]['name']}" for t in results['tracks']['items'][1:3]]
                     print(f"{Fore.YELLOW}🔄 Other matches found: {', '.join(alternatives)}{Style.RESET_ALL}")
             else:
-                self.speak(f"Couldn't find {song_name}")
+                # self.speak(f"Couldn't find {song_name}")
                 self.send_notification(
                     "❌ Song Not Found", 
                     f"No results for: '{song_name}'\nTry being more specific or check spelling",
@@ -714,7 +716,7 @@ class EnhancedVoiceAssistant:
                     5000
                 )  # Essential: notify on song not found
         except Exception as e:
-            self.speak("Sorry, couldn't play that song.")
+            # self.speak("Sorry, couldn't play that song.")
             self.send_notification(
                 "❌ Playback Error", 
                 f"Failed to play: {song_name}",
@@ -725,37 +727,38 @@ class EnhancedVoiceAssistant:
     def resume_playback(self):
         try:
             self.spotify.start_playback()
-            self.speak("Resuming playback")
+            # self.speak("Resuming playback")
             # self.send_notification("▶️ Playback Resumed", "Music playback resumed", "media-playback-start", "low", 2000)
         except Exception:
-            self.speak("No active device found. Start Spotify first.")
+            pass
+            # self.speak("No active device found. Start Spotify first.")
             self.send_notification("❌ No Active Device", "Please start Spotify first", "dialog-warning")  # Essential: notify on no device
     
     def pause_playback(self):
         try:
             self.spotify.pause_playback()
-            self.speak("Pausing")
+            # self.speak("Pausing")
             # self.send_notification("⏸️ Playback Paused", "Music paused", "media-playback-pause", "low", 2000)
         except Exception:
-            self.speak("Couldn't pause playback.")
+            # self.speak("Couldn't pause playback.")
             self.send_notification("❌ Pause Failed", "Couldn't pause", "dialog-error")  # Essential: notify on pause fail
     
     def next_track(self):
         try:
             self.spotify.next_track()
-            self.speak("Next track")
+            # self.speak("Next track")
             # self.send_notification("⏭️ Next Track", "Skipped to next", "media-skip-forward", "low", 2000)
         except Exception:
-            self.speak("Couldn't skip track.")
+            # self.speak("Couldn't skip track.")
             self.send_notification("❌ Skip Failed", "Couldn't skip", "dialog-error")  # Essential: notify on skip fail
     
     def previous_track(self):
         try:
             self.spotify.previous_track()
-            self.speak("Previous track")
+            # self.speak("Previous track")
             # self.send_notification("⏮️ Previous Track", "Went to previous", "media-skip-backward", "low", 2000)
         except Exception:
-            self.speak("Couldn't go back.")
+            # self.speak("Couldn't go back.")
             self.send_notification("❌ Previous Failed", "Couldn't go back", "dialog-error")  # Essential: notify on previous fail
     
     def adjust_volume(self, change):
@@ -764,11 +767,11 @@ class EnhancedVoiceAssistant:
             if current and current['device']:
                 volume = max(0, min(100, current['device']['volume_percent'] + change))
                 self.spotify.volume(volume)
-                self.speak(f"Volume {volume} percent")
+                # self.speak(f"Volume {volume} percent")
                 icon = "audio-volume-high" if volume > 66 else "audio-volume-medium" if volume > 33 else "audio-volume-low"
                 # self.send_notification(f"🔊 Volume: {volume}%", f"Adjusted to {volume}%", icon, "low", 2000)
         except Exception:
-            self.speak("Couldn't adjust volume.")
+            # self.speak("Couldn't adjust volume.")
             self.send_notification("❌ Volume Error", "Couldn't adjust", "dialog-error")  # Essential: notify on volume error
     
     def get_current_track(self):
@@ -777,14 +780,16 @@ class EnhancedVoiceAssistant:
             if current and current['is_playing']:
                 track = current['item']
                 message = f"Playing {track['name']} by {track['artists'][0]['name']}"
-                self.speak(message)
+                # self.speak(message)
                 # self.send_notification("🎵 Current Track", f"{track['name']}\nby {track['artists'][0]['name']}", "audio-volume-high", "normal", 4000)
             else:
-                self.speak("Nothing is playing")
+                # self.speak("Nothing is playing")
                 # self.send_notification("⏸️ No Music Playing", "No track playing", "audio-volume-muted")
+                pass
         except Exception:
-            self.speak("Couldn't get track info.")
+            # self.speak("Couldn't get track info.")
             self.send_notification("❌ Info Error", "Couldn't get info", "dialog-error")  # Essential: notify on info error
+            pass
     
     def offer_text_fallback(self):
         """Handle voice recognition failure by returning to sleep mode (kept for compatibility)"""
@@ -800,7 +805,7 @@ class EnhancedVoiceAssistant:
         )  # Essential: notify on recognition fail
         
         # Speak the failure message
-        self.speak("Voice recognition failed. Returning to sleep mode.")
+        # self.speak("Voice recognition failed. Returning to sleep mode.")
         
         # Simply return - don't switch to text mode
         return
@@ -825,7 +830,7 @@ class EnhancedVoiceAssistant:
                 user_input = input(f"{Fore.BLUE}text> {Style.RESET_ALL}").strip()
                 
                 if user_input.lower() in ['quit', 'exit', 'q']:
-                    self.speak("Goodbye!")
+                    # self.speak("Goodbye!")
                     self.send_notification("👋 Enhanced Assistant Stopping", "Shutting down", "application-exit", "low", 3000)  # Essential: notify on shutdown
                     self.is_running = False
                     break

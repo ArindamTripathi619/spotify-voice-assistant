@@ -51,6 +51,14 @@ class SpotifyController:
     def resume_playback(self):
         try:
             self.spotify.start_playback()
+            if self.notifier:
+                self.notifier.send_notification(
+                    "▶️ Playback Resumed",
+                    "Spotify playback resumed.",
+                    "audio-x-generic",
+                    "normal",
+                    3000
+                )
         except Exception:
             if self.notifier:
                 self.notifier.send_notification("❌ No Active Device", "Please start Spotify first", "dialog-warning")
@@ -58,6 +66,14 @@ class SpotifyController:
     def pause_playback(self):
         try:
             self.spotify.pause_playback()
+            if self.notifier:
+                self.notifier.send_notification(
+                    "⏸️ Playback Paused",
+                    "Spotify playback paused.",
+                    "audio-x-generic",
+                    "normal",
+                    3000
+                )
         except Exception:
             if self.notifier:
                 self.notifier.send_notification("❌ Pause Failed", "Couldn't pause", "dialog-error")
@@ -91,11 +107,35 @@ class SpotifyController:
             current = self.spotify.current_playback()
             if current and current['is_playing']:
                 track = current['item']
-                # Optionally notify or return track info
-                pass
+                name = track['name']
+                artist = track['artists'][0]['name']
+                album = track['album']['name']
+                if self.notifier:
+                    self.notifier.send_notification(
+                        "🎵 Now Playing",
+                        f"{name}\nby {artist}\nAlbum: {album}",
+                        "audio-x-generic",
+                        "normal",
+                        6000
+                    )
+                else:
+                    print(f"Now playing: {name} by {artist} (Album: {album})")
+            else:
+                if self.notifier:
+                    self.notifier.send_notification(
+                        "⏸️ Not Playing",
+                        "No track is currently playing.",
+                        "audio-x-generic",
+                        "normal",
+                        4000
+                    )
+                else:
+                    print("No track is currently playing.")
         except Exception:
             if self.notifier:
                 self.notifier.send_notification("❌ Info Error", "Couldn't get info", "dialog-error")
+            else:
+                print("Couldn't get current track info.")
 
     # All Spotify control methods will be moved here from EnhancedVoiceAssistant
     # e.g. play_song, resume_playback, pause_playback, next_track, previous_track, adjust_volume, get_current_track

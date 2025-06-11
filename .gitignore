@@ -99,3 +99,6 @@ logs/
 
 # Backups
 *.bak
+
+# TODO
+TODO.md

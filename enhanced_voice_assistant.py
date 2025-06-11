@@ -17,12 +17,26 @@ import threading
 import queue
 import json
 from datetime import datetime, timedelta
+import logging
+import signal
+
 
 init(autoreset=True)
 
+# Setup logging
+logging.basicConfig(
+    filename='voice_assistant.log',
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s'
+)
+
 class EnhancedVoiceAssistant:
     def __init__(self):
+        self._shutdown_requested = False
         load_dotenv()
+        # Register signal handlers for graceful shutdown
+        signal.signal(signal.SIGTERM, self.handle_shutdown)
+        signal.signal(signal.SIGINT, self.handle_shutdown)
         self.calibration_file = ".voice_calibration.json"
         
         # Send startup notification immediately
@@ -46,6 +60,7 @@ class EnhancedVoiceAssistant:
         
         print(f"{Fore.GREEN}🎵 Enhanced Voice Assistant Ready!{Style.RESET_ALL}")
         print(f"{Fore.CYAN}📢 Optimized for complete song name capture{Style.RESET_ALL}")
+        logging.info("Enhanced Voice Assistant initialized and ready.")
         
         # Send final ready notification
         self.send_notification(
@@ -55,6 +70,18 @@ class EnhancedVoiceAssistant:
             "normal",
             6000
         )  # Essential: notify when ready
+    def handle_shutdown(self, signum, frame):
+        logging.info(f"Received shutdown signal ({signum}). Shutting down gracefully.")
+        self._shutdown_requested = True
+        self.is_running = False
+        # Add any additional cleanup here if needed
+        try:
+            if hasattr(self, 'microphone'):
+                del self.microphone
+            if hasattr(self, 'tts'):
+                self.tts.stop()
+        except Exception as e:
+            logging.error(f"Error during shutdown cleanup: {e}")
     
     def setup_spotify(self):
         """Initialize Spotify API"""
@@ -62,9 +89,7 @@ class EnhancedVoiceAssistant:
             client_id = os.getenv('SPOTIFY_CLIENT_ID')
             client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
             redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:8080/callback')
-            
             scope = "user-modify-playback-state,user-read-playback-state,user-read-currently-playing"
-            
             self.spotify_oauth = SpotifyOAuth(
                 client_id=client_id,
                 client_secret=client_secret,
@@ -72,13 +97,12 @@ class EnhancedVoiceAssistant:
                 scope=scope,
                 cache_path=".spotify_cache"
             )
-            
             self.spotify = spotipy.Spotify(auth_manager=self.spotify_oauth)
             self.spotify.current_user()
             print(f"{Fore.GREEN}✅ Spotify connected{Style.RESET_ALL}")
-            
+            logging.info("Spotify connected successfully.")
         except Exception as e:
-            pass
+            logging.error(f"Spotify setup failed: {e}")
             print(f"{Fore.RED}❌ Spotify setup failed: {e}{Style.RESET_ALL}")
             self.send_notification(
                 "❌ Spotify Error", 
@@ -91,35 +115,30 @@ class EnhancedVoiceAssistant:
         """Setup audio with maximum optimization for long phrases"""
         try:
             self.recognizer = sr.Recognizer()
-            
             # Find best microphone
             self.select_best_microphone()
-            
             # ENHANCED settings specifically for longer phrases
             self.recognizer.energy_threshold = 200  # Lower threshold for sensitivity
             self.recognizer.dynamic_energy_threshold = True
             self.recognizer.dynamic_energy_adjustment_damping = 0.1  # More responsive
             self.recognizer.dynamic_energy_ratio = 1.2  # Less aggressive
-            
             # CRITICAL: Extended pause threshold for complete phrases
             self.recognizer.pause_threshold = 1.0  # Wait 1 second for pauses
             self.recognizer.phrase_threshold = 0.2  # More sensitive to start of speech
             self.recognizer.non_speaking_duration = 0.5  # Less aggressive silence detection
             self.recognizer.operation_timeout = None
-            
             # Initialize TTS
             self.tts = pyttsx3.init()
             self.tts.setProperty('rate', 160)
             self.tts.setProperty('volume', 0.9)
-            
             # Enhanced calibration with persistence
             self.smart_calibration()
-            
             print(f"{Fore.GREEN}✅ Enhanced audio setup for long phrases complete{Style.RESET_ALL}")
             print(f"{Fore.CYAN}🎛️ Pause threshold: {self.recognizer.pause_threshold}s{Style.RESET_ALL}")
             print(f"{Fore.CYAN}🎚️ Energy threshold: {self.recognizer.energy_threshold}{Style.RESET_ALL}")
-            
+            logging.info("Audio setup for long phrases complete.")
         except Exception as e:
+            logging.error(f"Audio setup failed: {e}")
             print(f"{Fore.RED}❌ Audio setup failed: {e}{Style.RESET_ALL}")
             self.send_notification(
                 "❌ Audio Error", 
@@ -1013,6 +1032,7 @@ def main():
         assistant = EnhancedVoiceAssistant()
         assistant.run()
     except Exception as e:
+        logging.critical(f"Failed to start enhanced assistant: {e}", exc_info=True)
         print(f"{Fore.RED}Failed to start enhanced assistant: {e}{Style.RESET_ALL}")
 
 if __name__ == "__main__":

@@ -56,21 +56,22 @@ if ! command_exists spotify; then
     echo
 fi
 
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    echo "📝 Creating .env file from template..."
-    cp .env.template .env
-    echo "✅ Created .env file. Please edit it with your credentials."
+
+# Create env/.env file if it doesn't exist
+if [ ! -f env/.env ]; then
+    echo "📝 Creating env/.env file from template..."
+    cp env/.env.template env/.env
+    echo "✅ Created env/.env file. Please edit it with your credentials."
 else
-    echo "✅ .env file already exists."
+    echo "✅ env/.env file already exists."
 fi
 
 echo
 echo "🎉 Setup complete!"
 echo
 echo "📋 Next steps:"
-echo "1. Edit the .env file with your Spotify credentials:"
-echo "   nano .env"
+echo "1. Edit the env/.env file with your Spotify credentials:"
+echo "   nano env/.env"
 echo
 echo "2. Get Spotify API credentials:"
 echo "   - Go to https://developer.spotify.com/dashboard/"
@@ -82,7 +83,7 @@ echo "3. Start Spotify on your system:"
 echo "   spotify &"
 echo
 echo "4. Run the enhanced voice assistant:"
-echo "   python enhanced_voice_assistant.py"
+echo "   python app/enhanced_voice_assistant.py"
 echo
 echo "🎤 Enhanced voice commands (wake word: 'jarvis'):"
 echo "   Wake word: Say 'jarvis' to activate, then:"
@@ -102,9 +103,11 @@ echo "   - Type 'wake' → Change wake word"
 echo "   - Type 'recalibrate' → Redo voice setup"
 echo
 echo "🎛️ Smart features:"
-echo "   - ✅ One-time voice calibration (remembers your settings)"
-echo "   - ✅ Auto-fallback to text mode when voice fails"
+echo "   - ✅ One-time voice calibration (remembers your settings, see calibration/.voice_calibration.json)"
+echo "   - ✅ Auto-fallback to text mode when voice fails" 
 echo "   - ✅ Desktop notifications for background operation"
 echo "   - ✅ Wake word detection with no external dependencies"
+echo "   - ✅ Logs stored in logs/voice_assistant.log"
+echo "   - ✅ Spotify cache in cache/.spotify_cache"
 echo
 

@@ -25,7 +25,7 @@ init(autoreset=True)
 
 # Setup logging
 logging.basicConfig(
-    filename='voice_assistant.log',
+    filename=os.path.join(os.path.dirname(__file__), '../logs/voice_assistant.log'),
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s'
 )
@@ -37,7 +37,7 @@ class EnhancedVoiceAssistant:
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGTERM, self.handle_shutdown)
         signal.signal(signal.SIGINT, self.handle_shutdown)
-        self.calibration_file = ".voice_calibration.json"
+        self.calibration_file = os.path.join(os.path.dirname(__file__), '../calibration/.voice_calibration.json')
         
         # Send startup notification immediately
         self.setup_notifications()
@@ -95,7 +95,7 @@ class EnhancedVoiceAssistant:
                 client_secret=client_secret,
                 redirect_uri=redirect_uri,
                 scope=scope,
-                cache_path=".spotify_cache"
+                cache_path=os.path.join(os.path.dirname(__file__), '../cache/.spotify_cache')
             )
             self.spotify = spotipy.Spotify(auth_manager=self.spotify_oauth)
             self.spotify.current_user()

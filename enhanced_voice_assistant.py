@@ -27,13 +27,13 @@ class EnhancedVoiceAssistant:
         
         # Send startup notification immediately
         self.setup_notifications()
-        self.send_notification(
-            "🚀 Enhanced Spotify Assistant Starting", 
-            "Initializing enhanced voice recognition...\nBackground mode ready!",
-            "application-x-executable",
-            "normal",
-            5000
-        )
+        # self.send_notification(
+        #     "🚀 Enhanced Spotify Assistant Starting", 
+        #     "Initializing enhanced voice recognition...\nBackground mode ready!",
+        #     "application-x-executable",
+        #     "normal",
+        #     5000
+        # )
         
         self.setup_spotify()
         self.setup_enhanced_audio()
@@ -54,7 +54,7 @@ class EnhancedVoiceAssistant:
             "audio-volume-high",
             "normal",
             6000
-        )
+        )  # Essential: notify when ready
     
     def setup_spotify(self):
         """Initialize Spotify API"""
@@ -83,7 +83,7 @@ class EnhancedVoiceAssistant:
                 "❌ Spotify Error", 
                 f"Failed to connect to Spotify: {str(e)[:50]}...",
                 "dialog-error"
-            )
+            )  # Essential: notify on Spotify error
             raise
     
     def setup_enhanced_audio(self):
@@ -205,13 +205,13 @@ class EnhancedVoiceAssistant:
         print(f"{Fore.YELLOW}📊 Smart calibration starting...{Style.RESET_ALL}")
         
         # Send calibration start notification
-        self.send_notification(
-            "🔧 Voice Calibration Starting", 
-            "Checking voice settings and ambient noise...",
-            "preferences-desktop-sound",
-            "low",
-            4000
-        )
+        # self.send_notification(
+        #     "🔧 Voice Calibration Starting", 
+        #     "Checking voice settings and ambient noise...",
+        #     "preferences-desktop-sound",
+        #     "low",
+        #     4000
+        # )
         
         # Try to load existing calibration
         saved_data = self.load_calibration_data()
@@ -226,13 +226,13 @@ class EnhancedVoiceAssistant:
             print(f"  Pause threshold: {self.recognizer.pause_threshold}s")
             
             # Send quick calibration notification
-            self.send_notification(
-                "⚡ Quick Calibration", 
-                f"Using saved settings from previous session\nEnergy: {self.recognizer.energy_threshold:.0f} | Pause: {self.recognizer.pause_threshold}s",
-                "dialog-information",
-                "low",
-                3000
-            )
+            # self.send_notification(
+            #     "⚡ Quick Calibration", 
+            #     f"Using saved settings from previous session\nEnergy: {self.recognizer.energy_threshold:.0f} | Pause: {self.recognizer.pause_threshold}s",
+            #     "dialog-information",
+            #     "low",
+            #     3000
+            # )
             
             # Still do ambient noise adjustment
             print(f"{Fore.YELLOW}🔇 Quick ambient noise check (2 seconds)...{Style.RESET_ALL}")
@@ -242,31 +242,31 @@ class EnhancedVoiceAssistant:
                 print(f"{Fore.GREEN}✅ Ambient noise adjusted{Style.RESET_ALL}")
                 
                 # Send calibration complete notification
-                self.send_notification(
-                    "✅ Voice Calibration Complete", 
-                    "Background mode ready for voice commands!\nAmbient noise adjusted.",
-                    "audio-input-microphone",
-                    "normal",
-                    4000
-                )
+                # self.send_notification(
+                #     "✅ Voice Calibration Complete", 
+                #     "Background mode ready for voice commands!\nAmbient noise adjusted.",
+                #     "audio-input-microphone",
+                #     "normal",
+                #     4000
+                # )
             except Exception as e:
                 print(f"{Fore.YELLOW}⚠️ Ambient adjustment failed: {e}{Style.RESET_ALL}")
-                self.send_notification(
-                    "⚠️ Calibration Warning", 
-                    "Ambient noise adjustment failed but proceeding with saved settings",
-                    "dialog-warning",
-                    "normal",
-                    4000
-                )
+                # self.send_notification(
+                #     "⚠️ Calibration Warning", 
+                #     "Ambient noise adjustment failed but proceeding with saved settings",
+                #     "dialog-warning",
+                #     "normal",
+                #     4000
+                # )
         else:
             # Perform full calibration for first time or when data is stale
-            self.send_notification(
-                "🎤 First-Time Voice Setup", 
-                "No saved settings found. Starting full calibration...",
-                "preferences-desktop-sound",
-                "normal",
-                5000
-            )
+            # self.send_notification(
+            #     "🎤 First-Time Voice Setup", 
+            #     "No saved settings found. Starting full calibration...",
+            #     "preferences-desktop-sound",
+            #     "normal",
+            #     5000
+            # )
             self.enhanced_calibration()
     
     def enhanced_calibration(self):
@@ -275,13 +275,13 @@ class EnhancedVoiceAssistant:
         print(f"{Fore.YELLOW}🔇 Please be quiet for 4 seconds{Style.RESET_ALL}")
         
         # Send ambient noise calibration notification
-        self.send_notification(
-            "🔇 Ambient Noise Calibration", 
-            "Please be quiet for 4 seconds...\nMeasuring background noise levels.",
-            "audio-input-microphone",
-            "normal",
-            6000
-        )
+        # self.send_notification(
+        #     "🔇 Ambient Noise Calibration", 
+        #     "Please be quiet for 4 seconds...\nMeasuring background noise levels.",
+        #     "audio-input-microphone",
+        #     "normal",
+        #     6000
+        # )
         
         try:
             with self.microphone as source:
@@ -296,13 +296,13 @@ class EnhancedVoiceAssistant:
             print(f"{Fore.GREEN}Say: 'play Hotel California by Eagles' now{Style.RESET_ALL}")
             
             # Send voice test notification
-            self.send_notification(
-                "🎤 Voice Test Required", 
-                "Please say: 'play Hotel California by Eagles'\nThis helps optimize recognition for your voice.",
-                "audio-input-microphone",
-                "critical",
-                8000
-            )
+            # self.send_notification(
+            #     "🎤 Voice Test Required", 
+            #     "Please say: 'play Hotel California by Eagles'\nThis helps optimize recognition for your voice.",
+            #     "audio-input-microphone",
+            #     "critical",
+            #     8000
+            # )
             
             with self.microphone as source:
                 try:
@@ -338,13 +338,13 @@ class EnhancedVoiceAssistant:
             )
             
             # Send calibration success notification
-            self.send_notification(
-                "✅ Voice Calibration Complete", 
-                f"Voice recognition optimized!\nEnergy: {self.recognizer.energy_threshold:.0f} | Pause: {self.recognizer.pause_threshold}s\nBackground mode ready!",
-                "audio-input-microphone",
-                "normal",
-                6000
-            )
+            # self.send_notification(
+            #     "✅ Voice Calibration Complete", 
+            #     f"Voice recognition optimized!\nEnergy: {self.recognizer.energy_threshold:.0f} | Pause: {self.recognizer.pause_threshold}s\nBackground mode ready!",
+            #     "audio-input-microphone",
+            #     "normal",
+            #     6000
+            # )
             
         except Exception as e:
             print(f"{Fore.RED}❌ Calibration failed: {e}{Style.RESET_ALL}")
@@ -428,13 +428,13 @@ class EnhancedVoiceAssistant:
             print(f"{Fore.CYAN}⏱️ You have {timeout} seconds, I'll wait {self.recognizer.pause_threshold} seconds for pauses{Style.RESET_ALL}")
             
             # Send enhanced listening notification
-            self.send_notification(
-                "🎤 Enhanced Listening Mode", 
-                f"Waiting for your COMPLETE command...\nPause detection: {self.recognizer.pause_threshold}s",
-                "audio-input-microphone",
-                "low",
-                timeout * 1000
-            )
+            # self.send_notification(
+            #     "🎤 Enhanced Listening Mode", 
+            #     f"Waiting for your COMPLETE command...\nPause detection: {self.recognizer.pause_threshold}s",
+            #     "audio-input-microphone",
+            #     "low",
+            #     timeout * 1000
+            # )
             
             print(f"{Fore.GREEN}🟢 LISTENING NOW - Speak your full command!{Style.RESET_ALL}")
             print(f"{Fore.YELLOW}💬 I'll wait for natural pauses in your speech...{Style.RESET_ALL}")
@@ -459,13 +459,13 @@ class EnhancedVoiceAssistant:
             try:
                 command = self.recognizer.recognize_google(audio, language='en-US').lower()
                 print(f"{Fore.GREEN}✅ Google (US) recognized: '{command}'{Style.RESET_ALL}")
-                self.send_notification(
-                    "✅ Full Command Recognized", 
-                    f"Captured: '{command}'",
-                    "dialog-information",
-                    "low",
-                    4000
-                )
+                # self.send_notification(
+                #     "✅ Full Command Recognized", 
+                #     f"Captured: '{command}'",
+                #     "dialog-information",
+                #     "low",
+                #     4000
+                # )
                 self.success_count += 1
                 return command
             except sr.UnknownValueError:
@@ -477,13 +477,13 @@ class EnhancedVoiceAssistant:
             try:
                 command = self.recognizer.recognize_google(audio, language='en-GB').lower()
                 print(f"{Fore.GREEN}✅ Google (UK) recognized: '{command}'{Style.RESET_ALL}")
-                self.send_notification(
-                    "✅ Full Command Recognized", 
-                    f"Captured: '{command}'",
-                    "dialog-information",
-                    "low",
-                    4000
-                )
+                # self.send_notification(
+                #     "✅ Full Command Recognized", 
+                #     f"Captured: '{command}'",
+                #     "dialog-information",
+                #     "low",
+                #     4000
+                # )
                 self.success_count += 1
                 return command
             except:
@@ -499,13 +499,13 @@ class EnhancedVoiceAssistant:
                         confidence = alternatives[0].get('confidence', 0)
                         print(f"{Fore.GREEN}✅ Google (alternatives) recognized: '{command}' (confidence: {confidence:.2f}){Style.RESET_ALL}")
                         if confidence > 0.3:  # Accept lower confidence for longer phrases
-                            self.send_notification(
-                                "✅ Command Recognized (Alt)", 
-                                f"Captured: '{command}'\nConfidence: {confidence:.2f}",
-                                "dialog-information",
-                                "low",
-                                4000
-                            )
+                            # self.send_notification(
+                            #     "✅ Command Recognized (Alt)", 
+                            #     f"Captured: '{command}'\nConfidence: {confidence:.2f}",
+                            #     "dialog-information",
+                            #     "low",
+                            #     4000
+                            # )
                             self.success_count += 1
                             return command
             except:
@@ -521,7 +521,7 @@ class EnhancedVoiceAssistant:
                 "dialog-warning",
                 "normal",
                 4000
-            )
+            )  # Essential: notify on recognition failure
             
             # Speak the failure message
             self.speak("Sorry, I couldn't understand that. Going back to sleep.")
@@ -540,7 +540,7 @@ class EnhancedVoiceAssistant:
                 "dialog-warning",
                 "normal",
                 4000
-            )
+            )  # Essential: notify on timeout
             
             # Speak the timeout message
             self.speak("No speech detected. Going back to sleep.")
@@ -618,13 +618,13 @@ class EnhancedVoiceAssistant:
                 print(f"   Energy: {old_threshold:.0f} → {self.recognizer.energy_threshold:.0f}")
                 print(f"   Pause: {old_pause:.1f}s → {self.recognizer.pause_threshold:.1f}s")
                 
-                self.send_notification(
-                    "🔧 Sensitivity Adjusted", 
-                    "Made recognition more sensitive for better phrase capture",
-                    "dialog-information",
-                    "low",
-                    3000
-                )
+                # self.send_notification(
+                #     "🔧 Sensitivity Adjusted", 
+                #     "Made recognition more sensitive for better phrase capture",
+                #     "dialog-information",
+                #     "low",
+                #     3000
+                # )
     
     def process_command(self, command):
         """Enhanced command processing with better song name extraction"""
@@ -670,7 +670,7 @@ class EnhancedVoiceAssistant:
                     "application-exit",
                     "low",
                     3000
-                )
+                )  # Essential: notify on shutdown
                 self.is_running = False
             else:
                 self.speak(f"I heard '{command}' but didn't understand the command. Try 'play [full song name]' or other basic commands.")
@@ -698,7 +698,7 @@ class EnhancedVoiceAssistant:
                     "audio-volume-high",
                     "normal",
                     6000
-                )
+                )  # Essential: notify on song play
                 
                 # Show alternatives if available
                 if len(results['tracks']['items']) > 1:
@@ -712,51 +712,51 @@ class EnhancedVoiceAssistant:
                     "dialog-warning",
                     "normal",
                     5000
-                )
+                )  # Essential: notify on song not found
         except Exception as e:
             self.speak("Sorry, couldn't play that song.")
             self.send_notification(
                 "❌ Playback Error", 
                 f"Failed to play: {song_name}",
                 "dialog-error"
-            )
+            )  # Essential: notify on playback error
     
     # (Include all other Spotify methods from previous version)
     def resume_playback(self):
         try:
             self.spotify.start_playback()
             self.speak("Resuming playback")
-            self.send_notification("▶️ Playback Resumed", "Music playback resumed", "media-playback-start", "low", 2000)
+            # self.send_notification("▶️ Playback Resumed", "Music playback resumed", "media-playback-start", "low", 2000)
         except Exception:
             self.speak("No active device found. Start Spotify first.")
-            self.send_notification("❌ No Active Device", "Please start Spotify first", "dialog-warning")
+            self.send_notification("❌ No Active Device", "Please start Spotify first", "dialog-warning")  # Essential: notify on no device
     
     def pause_playback(self):
         try:
             self.spotify.pause_playback()
             self.speak("Pausing")
-            self.send_notification("⏸️ Playback Paused", "Music paused", "media-playback-pause", "low", 2000)
+            # self.send_notification("⏸️ Playback Paused", "Music paused", "media-playback-pause", "low", 2000)
         except Exception:
             self.speak("Couldn't pause playback.")
-            self.send_notification("❌ Pause Failed", "Couldn't pause", "dialog-error")
+            self.send_notification("❌ Pause Failed", "Couldn't pause", "dialog-error")  # Essential: notify on pause fail
     
     def next_track(self):
         try:
             self.spotify.next_track()
             self.speak("Next track")
-            self.send_notification("⏭️ Next Track", "Skipped to next", "media-skip-forward", "low", 2000)
+            # self.send_notification("⏭️ Next Track", "Skipped to next", "media-skip-forward", "low", 2000)
         except Exception:
             self.speak("Couldn't skip track.")
-            self.send_notification("❌ Skip Failed", "Couldn't skip", "dialog-error")
+            self.send_notification("❌ Skip Failed", "Couldn't skip", "dialog-error")  # Essential: notify on skip fail
     
     def previous_track(self):
         try:
             self.spotify.previous_track()
             self.speak("Previous track")
-            self.send_notification("⏮️ Previous Track", "Went to previous", "media-skip-backward", "low", 2000)
+            # self.send_notification("⏮️ Previous Track", "Went to previous", "media-skip-backward", "low", 2000)
         except Exception:
             self.speak("Couldn't go back.")
-            self.send_notification("❌ Previous Failed", "Couldn't go back", "dialog-error")
+            self.send_notification("❌ Previous Failed", "Couldn't go back", "dialog-error")  # Essential: notify on previous fail
     
     def adjust_volume(self, change):
         try:
@@ -766,10 +766,10 @@ class EnhancedVoiceAssistant:
                 self.spotify.volume(volume)
                 self.speak(f"Volume {volume} percent")
                 icon = "audio-volume-high" if volume > 66 else "audio-volume-medium" if volume > 33 else "audio-volume-low"
-                self.send_notification(f"🔊 Volume: {volume}%", f"Adjusted to {volume}%", icon, "low", 2000)
+                # self.send_notification(f"🔊 Volume: {volume}%", f"Adjusted to {volume}%", icon, "low", 2000)
         except Exception:
             self.speak("Couldn't adjust volume.")
-            self.send_notification("❌ Volume Error", "Couldn't adjust", "dialog-error")
+            self.send_notification("❌ Volume Error", "Couldn't adjust", "dialog-error")  # Essential: notify on volume error
     
     def get_current_track(self):
         try:
@@ -778,13 +778,13 @@ class EnhancedVoiceAssistant:
                 track = current['item']
                 message = f"Playing {track['name']} by {track['artists'][0]['name']}"
                 self.speak(message)
-                self.send_notification("🎵 Current Track", f"{track['name']}\nby {track['artists'][0]['name']}", "audio-volume-high", "normal", 4000)
+                # self.send_notification("🎵 Current Track", f"{track['name']}\nby {track['artists'][0]['name']}", "audio-volume-high", "normal", 4000)
             else:
                 self.speak("Nothing is playing")
-                self.send_notification("⏸️ No Music Playing", "No track playing", "audio-volume-muted")
+                # self.send_notification("⏸️ No Music Playing", "No track playing", "audio-volume-muted")
         except Exception:
             self.speak("Couldn't get track info.")
-            self.send_notification("❌ Info Error", "Couldn't get info", "dialog-error")
+            self.send_notification("❌ Info Error", "Couldn't get info", "dialog-error")  # Essential: notify on info error
     
     def offer_text_fallback(self):
         """Handle voice recognition failure by returning to sleep mode (kept for compatibility)"""
@@ -797,7 +797,7 @@ class EnhancedVoiceAssistant:
             "dialog-warning",
             "normal",
             4000
-        )
+        )  # Essential: notify on recognition fail
         
         # Speak the failure message
         self.speak("Voice recognition failed. Returning to sleep mode.")
@@ -809,13 +809,13 @@ class EnhancedVoiceAssistant:
         """Persistent text mode with option to return to voice"""
         print(f"\n{Fore.BLUE}📝 TEXT MODE: Type commands or 'voice' to return to voice mode{Style.RESET_ALL}")
         
-        self.send_notification(
-            "⌨️ Text Mode Active", 
-            "Type commands manually.\nType 'voice' to return to voice mode.",
-            "input-keyboard",
-            "normal",
-            5000
-        )
+        # self.send_notification(
+        #     "⌨️ Text Mode Active", 
+        #     "Type commands manually.\nType 'voice' to return to voice mode.",
+        #     "input-keyboard",
+        #     "normal",
+        #     5000
+        # )
         
         try:
             while self.is_running:
@@ -826,18 +826,18 @@ class EnhancedVoiceAssistant:
                 
                 if user_input.lower() in ['quit', 'exit', 'q']:
                     self.speak("Goodbye!")
-                    self.send_notification("👋 Enhanced Assistant Stopping", "Shutting down", "application-exit", "low", 3000)
+                    self.send_notification("👋 Enhanced Assistant Stopping", "Shutting down", "application-exit", "low", 3000)  # Essential: notify on shutdown
                     self.is_running = False
                     break
                 elif user_input.lower() == 'voice':
                     print(f"{Fore.GREEN}🎤 Returning to voice-first mode...{Style.RESET_ALL}")
-                    self.send_notification(
-                        "🎤 Voice Mode Restored", 
-                        "Returning to voice-first mode",
-                        "audio-input-microphone",
-                        "normal",
-                        4000
-                    )
+                    # self.send_notification(
+                    #     "🎤 Voice Mode Restored", 
+                    #     "Returning to voice-first mode",
+                    #     "audio-input-microphone",
+                    #     "normal",
+                    #     4000
+                    # )
                     break  # Exit text loop, return to voice mode
                 elif user_input.lower() == 'help':
                     self.show_enhanced_tips()
@@ -874,7 +874,7 @@ class EnhancedVoiceAssistant:
                 "dialog-information",
                 "normal",
                 5000
-            )
+            )  # Essential: notify on wake word change
             
             # Save to calibration file
             try:
@@ -932,7 +932,7 @@ class EnhancedVoiceAssistant:
             "audio-input-microphone",
             "normal",
             8000
-        )
+        )  # Essential: notify on wake mode
         
         print(f"\n{Fore.GREEN}😴 WAKE WORD MODE: Say '{self.wake_word}' to start!{Style.RESET_ALL}")
         print(f"{Fore.CYAN}💡 I'll sleep between commands to let you enjoy your music{Style.RESET_ALL}")
@@ -961,7 +961,7 @@ class EnhancedVoiceAssistant:
                             "audio-input-microphone",
                             "normal",
                             4000
-                        )
+                        )  # Essential: notify on wake word
                         
                         # Now listen for the actual command ("yes sir" has completed)
                         print(f"{Fore.YELLOW}🎤 Now listening for your command...{Style.RESET_ALL}")
@@ -974,13 +974,13 @@ class EnhancedVoiceAssistant:
                             self.is_awake = False
                             print(f"{Fore.BLUE}😴 Going back to sleep... Say '{self.wake_word}' when you need me{Style.RESET_ALL}")
                             
-                            self.send_notification(
-                                "😴 Assistant Sleeping", 
-                                f"Command executed! Say '{self.wake_word}' to wake me again.",
-                                "audio-input-microphone",
-                                "low",
-                                4000
-                            )
+                            # self.send_notification(
+                            #     "😴 Assistant Sleeping", 
+                            #     f"Command executed! Say '{self.wake_word}' to wake me again.",
+                            #     "audio-input-microphone",
+                            #     "low",
+                            #     4000
+                            # )
                         else:
                             # Voice command failed, go back to sleep
                             print(f"{Fore.YELLOW}😴 Command failed, going back to sleep...{Style.RESET_ALL}")
@@ -1012,4 +1012,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

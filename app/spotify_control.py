@@ -81,16 +81,62 @@ class SpotifyController:
     def next_track(self):
         try:
             self.spotify.next_track()
-        except Exception:
+            # After skipping, fetch and notify the new track info
+            current = self.spotify.current_playback()
+            if current and current['is_playing']:
+                track = current['item']
+                name = track['name']
+                artist = track['artists'][0]['name']
+                album = track['album']['name']
+                if self.notifier:
+                    self.notifier.send_notification(
+                        "⏭️ Next Track",
+                        f"{name}\nby {artist}\nAlbum: {album}",
+                        "audio-x-generic",
+                        "normal",
+                        6000
+                    )
+        except Exception as e:
+            msg = str(e)
             if self.notifier:
-                self.notifier.send_notification("❌ Skip Failed", "Couldn't skip", "dialog-error")
+                if 'Restriction violated' in msg:
+                    self.notifier.send_notification(
+                        "❌ Skip Failed",
+                        "Spotify cannot skip track on this device. Try using the official Spotify app.",
+                        "dialog-error"
+                    )
+                else:
+                    self.notifier.send_notification("❌ Skip Failed", msg, "dialog-error")
 
     def previous_track(self):
         try:
             self.spotify.previous_track()
-        except Exception:
+            # After going to previous, fetch and notify the new track info
+            current = self.spotify.current_playback()
+            if current and current['is_playing']:
+                track = current['item']
+                name = track['name']
+                artist = track['artists'][0]['name']
+                album = track['album']['name']
+                if self.notifier:
+                    self.notifier.send_notification(
+                        "⏮️ Previous Track",
+                        f"{name}\nby {artist}\nAlbum: {album}",
+                        "audio-x-generic",
+                        "normal",
+                        6000
+                    )
+        except Exception as e:
+            msg = str(e)
             if self.notifier:
-                self.notifier.send_notification("❌ Previous Failed", "Couldn't go back", "dialog-error")
+                if 'Restriction violated' in msg:
+                    self.notifier.send_notification(
+                        "❌ Previous Failed",
+                        "Spotify cannot go to previous track on this device. Try using the official Spotify app.",
+                        "dialog-error"
+                    )
+                else:
+                    self.notifier.send_notification("❌ Previous Failed", msg, "dialog-error")
 
     def adjust_volume(self, change):
         try:
@@ -98,9 +144,17 @@ class SpotifyController:
             if current and current['device']:
                 volume = max(0, min(100, current['device']['volume_percent'] + change))
                 self.spotify.volume(volume)
-        except Exception:
+        except Exception as e:
+            msg = str(e)
             if self.notifier:
-                self.notifier.send_notification("❌ Volume Error", "Couldn't adjust", "dialog-error")
+                if 'Cannot control device volume' in msg:
+                    self.notifier.send_notification(
+                        "❌ Volume Error",
+                        "Cannot control volume on this device. Try using the official Spotify app.",
+                        "dialog-error"
+                    )
+                else:
+                    self.notifier.send_notification("❌ Volume Error", msg, "dialog-error")
 
     def get_current_track(self):
         try:

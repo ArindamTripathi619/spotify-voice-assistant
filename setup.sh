@@ -83,7 +83,7 @@ echo "3. Start Spotify on your system:"
 echo "   spotify &"
 echo
 echo "4. Run the enhanced voice assistant:"
-echo "   python app/enhanced_voice_assistant.py"
+echo "   python -m app.main"
 echo
 echo "🎤 Enhanced voice commands (wake word: 'jarvis'):"
 echo "   Wake word: Say 'jarvis' to activate, then:"
@@ -105,7 +105,7 @@ echo
 echo "🎛️ Smart features:"
 echo "   - ✅ One-time voice calibration (remembers your settings, see calibration/.voice_calibration.json)"
 echo "   - ✅ Auto-fallback to text mode when voice fails" 
-echo "   - ✅ Desktop notifications for background operation"
+echo "   - ✅ Desktop notifications for background operation (no terminal clutter)"
 echo "   - ✅ Wake word detection with no external dependencies"
 echo "   - ✅ Logs stored in logs/voice_assistant.log"
 echo "   - ✅ Spotify cache in cache/.spotify_cache"

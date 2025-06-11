@@ -1,14 +1,9 @@
 
 # Ignore new project structure directories
+
 logs/
 calibration/
 env/
-cache/
-
-# Environment variables
-env/
-
-# Spotify authentication cache
 cache/
 
 # Python

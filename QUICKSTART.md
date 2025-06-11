@@ -13,8 +13,8 @@ chmod +x setup.sh
 cp .env.template .env
 nano .env
 
-# Start the enhanced assistant
-python enhanced_voice_assistant.py
+# Start the enhanced assistant (from project root)
+python -m app.main
 ```
 
 ## 📋 Step-by-Step Guide
@@ -72,7 +72,7 @@ spotify &
 ### Step 5: Run Enhanced Assistant
 
 ```bash
-python enhanced_voice_assistant.py
+python -m app.main
 ```
 
 ## 🎤 First Time Setup
@@ -122,6 +122,9 @@ Type 'wake' → Change wake word   # Customize activation
 - **Auto-saves** → No repeated setup
 - **Background ready** → Perfect for Hyprland/i3/sway
 
+### Log Rotation
+- **Log files** are automatically rotated (up to 5 files, 1MB each). No manual cleanup needed.
+
 ## 🐛 Quick Troubleshooting
 
 **Wake word not working?**
@@ -158,7 +161,7 @@ notify-send "Test" "Working!"
 
 ```bash
 # Run in background
-python enhanced_voice_assistant.py &
+python -m app.main &
 
 # Or create a desktop entry/autostart
 ```

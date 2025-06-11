@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
 
-A sophisticated Linux-native voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Optimized for Hyprland on Arch Linux but compatible with other Linux distributions.
+A sophisticated Linux-native voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Optimized for Hyprland on Arch Linux but compatible with other Linux distributions. Now fully modularized for maintainability and clarity.
 
 ## ✨ Key Features
 
@@ -13,6 +13,7 @@ A sophisticated Linux-native voice-controlled Spotify assistant with **wake word
 - 🎯 **Smart Fallback**: Automatic text mode when voice recognition fails
 - 🔊 **Enhanced Audio Processing**: Extended pause detection for natural speech
 - 💾 **Zero Configuration**: Saves voice settings automatically
+- **Log Rotation**: Log files are automatically rotated—no manual cleanup needed. Up to 5 log files of 1MB each are kept in `logs/`.
 
 ## 🎭 How It Works
 
@@ -96,12 +97,13 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8080/callback
 
 ### 4. Start the Assistant
 
+
 ```bash
 # Make sure Spotify is running
 spotify &
 
-# Start the enhanced assistant
-python enhanced_voice_assistant.py
+# Start the enhanced assistant (from project root)
+python -m app.main
 ```
 
 ### 5. First Time Setup
@@ -267,14 +269,23 @@ listening habits
 
 ```
 spotify-voice-assistant/
-├── enhanced_voice_assistant.py  # 🎤 Main application
-├── requirements.txt             # 📦 Python dependencies
-├── .env.template               # ⚙️ Configuration template
-├── setup.sh                    # 🚀 Arch Linux setup script
-├── README.md                   # 📖 This file
+
+├── app/
+│   ├── assistant.py           # 🎤 Main orchestration (entry point logic)
+│   ├── audio.py               # 🎙️ Audio, calibration, and recognition logic
+│   ├── spotify_control.py     # � Spotify API integration
+│   ├── notifications.py       # 🔔 Desktop notification logic
+│   ├── utils.py               # ⚙️ Environment loader
+│   ├── main.py                # 🚀 Entry point (run with python -m app.main)
+│   └── __init__.py            # 📦 Package marker
+├── requirements.txt           # 📦 Python dependencies
+├── env/.env                   # ⚙️ Environment variables
+├── setup.sh                   # 🚀 Arch Linux setup script
+├── README.md                  # 📖 This file
 ├── QUICKSTART.md              # ⚡ Quick setup guide
-├── .voice_calibration.json    # 💾 Auto-generated voice settings
-├── .spotify_cache             # 🔑 Auto-generated Spotify tokens
+├── calibration/.voice_calibration.json # 💾 Auto-generated voice settings
+├── cache/.spotify_cache       # 🔑 Auto-generated Spotify tokens
+├── logs/voice_assistant.log   # 📝 Log file
 └── venv/                      # 🐍 Virtual environment
 ```
 
@@ -298,7 +309,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Test your changes
-python enhanced_voice_assistant.py
+python -m app.main
 ```
 
 ## 📄 License

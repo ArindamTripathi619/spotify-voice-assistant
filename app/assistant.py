@@ -36,6 +36,7 @@ class EnhancedVoiceAssistant:
         )
         self.is_running = True
         self.is_awake = False
+        self.switch_to_text_mode = False  # Flag for switching to text mode
         logging.info("EnhancedVoiceAssistant initialized.")
 
     def run(self):
@@ -48,13 +49,27 @@ class EnhancedVoiceAssistant:
             "normal",
             8000
         )
-        def handle_shutdown(signum, frame):
+        def handle_sigterm(signum, frame):
             logging.info(f"Received shutdown signal ({signum}). Shutting down gracefully.")
             self.is_running = False
-        signal.signal(signal.SIGTERM, handle_shutdown)
-        signal.signal(signal.SIGINT, handle_shutdown)
+        def handle_sigint(signum, frame):
+            logging.info("SIGINT received: switching to text mode.")
+            self.switch_to_text_mode = True
+        signal.signal(signal.SIGTERM, handle_sigterm)
+        signal.signal(signal.SIGINT, handle_sigint)
         try:
             while self.is_running:
+                if self.switch_to_text_mode:
+                    self.switch_to_text_mode = False
+                    self.text_mode_loop()
+                    self.notifier.send_notification(
+                        "😴 Wake Word Mode Active",
+                        f"Say '{self.wake_word}' to wake me up! I'll sleep between commands to save resources.",
+                        "audio-input-microphone",
+                        "normal",
+                        8000
+                    )
+                    continue
                 if not self.is_awake:
                     if self.audio_manager.listen_for_wake_word():
                         self.is_awake = True
@@ -73,8 +88,6 @@ class EnhancedVoiceAssistant:
                             self.is_awake = False
                 else:
                     self.is_awake = False
-        except KeyboardInterrupt:
-            self.text_mode_loop()
         except Exception as e:
             logging.error(f"Error in main loop: {e}")
 

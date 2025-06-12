@@ -2,20 +2,17 @@
 
 Get your **enhanced voice assistant** with wake word "jarvis" running in 5 minutes!
 
-## 🚀 One-Command Setup (Arch Linux)
+
+## 🚀 Universal One-Command Setup (All Linux Distros)
 
 ```bash
-# Run automated setup
-chmod +x setup.sh
-./setup.sh
-
-# Configure credentials
-cp .env.template .env
-nano .env
-
-# Start the enhanced assistant (from project root)
-python -m app.main
+chmod +x universal_setup.sh
+./universal_setup.sh
 ```
+
+- The script will auto-detect your Linux distribution and desktop environment, install all dependencies, and guide you through setup interactively.
+- Works on Arch, Ubuntu, Debian, Fedora, openSUSE, and more. Compatible with GNOME, KDE, XFCE, i3, Sway, Hyprland, and most other DEs.
+- If any dependency is missing or unsupported, you'll get clear instructions and guidance.
 
 ## 📋 Step-by-Step Guide
 

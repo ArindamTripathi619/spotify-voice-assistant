@@ -2,7 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
 
-A sophisticated Linux-native voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Optimized for Hyprland on Arch Linux but compatible with other Linux distributions. Now fully modularized for maintainability and clarity.
+A sophisticated Linux-native voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Now fully modularized for maintainability and clarity.
+
+> **Now works seamlessly on most major Linux distributions and desktop environments (GNOME, KDE, XFCE, i3, Sway, Hyprland, and more).**
+>
+> **Universal, interactive setup script included!**
 
 ## ✨ Key Features
 

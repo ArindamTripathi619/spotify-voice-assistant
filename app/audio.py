@@ -35,7 +35,7 @@ class AudioManager:
             self.smart_calibration()
             logging.info("Audio setup for long phrases complete.")
         except Exception as e:
-            logging.error(f"Audio setup failed: {e}")
+            logging.exception(f"Audio setup failed in setup_enhanced_audio (calibration_file={self.calibration_file}, wake_word={self.wake_word}):")
             if self.notifier:
                 self.notifier.send_notification(
                     "❌ Audio Error",
@@ -69,7 +69,7 @@ class AudioManager:
                     return data
             return None
         except Exception as e:
-            logging.warning(f"Failed to load calibration data: {e}")
+            logging.warning(f"Failed to load calibration data: {e}", exc_info=True)
             return None
 
     def save_calibration_data(self, energy_threshold, pause_threshold, success_rate=1.0):
@@ -89,7 +89,7 @@ class AudioManager:
                 json.dump(data, f, indent=2)
             return True
         except Exception as e:
-            logging.warning(f"Failed to save calibration data: {e}")
+            logging.warning(f"Failed to save calibration data: {e}", exc_info=True)
             return False
 
     def smart_calibration(self):
@@ -104,7 +104,7 @@ class AudioManager:
                 with mic as source:
                     recognizer.adjust_for_ambient_noise(source, duration=2)
             except Exception as e:
-                logging.warning(f"Ambient adjustment failed: {e}")
+                logging.warning(f"Ambient adjustment failed: {e}", exc_info=True)
         else:
             self.enhanced_calibration()
 
@@ -148,7 +148,7 @@ class AudioManager:
                 self.tts.say(text)
                 self.tts.runAndWait()
             except Exception as e:
-                logging.error(f"TTS Error: {e}")
+                logging.exception(f"TTS Error in speak (text={text}, wait={wait}):")
         if wait:
             speak_thread()
             return None
@@ -209,7 +209,7 @@ class AudioManager:
         except sr.WaitTimeoutError:
             return None
         except Exception as e:
-            logging.error(f"Enhanced listening error: {e}")
+            logging.exception(f"Enhanced listening error in listen_for_command (timeout={timeout}, wake_word={self.wake_word}):")
             return None
         finally:
             self.attempt_count += 1
@@ -241,7 +241,7 @@ class AudioManager:
         except sr.WaitTimeoutError:
             return False
         except Exception as e:
-            logging.error(f"Wake word listening error: {e}")
+            logging.exception(f"Wake word listening error in listen_for_wake_word (wake_word={self.wake_word}):")
             return False
 
     def adjust_sensitivity(self):

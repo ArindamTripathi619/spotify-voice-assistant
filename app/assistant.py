@@ -89,7 +89,7 @@ class EnhancedVoiceAssistant:
                 else:
                     self.is_awake = False
         except Exception as e:
-            logging.error(f"Error in main loop: {e}")
+            logging.exception(f"Error in main loop (wake_word={self.wake_word}, is_running={self.is_running}, is_awake={self.is_awake}):")
 
     def text_mode_loop(self):
         print("\n📝 TEXT MODE: Type commands or 'voice' to return to voice mode")

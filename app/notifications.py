@@ -14,10 +14,10 @@ class NotificationManager:
                 logging.info("Desktop notifications enabled.")
             else:
                 self.notifications_enabled = False
-                logging.warning("notify-send not found, notifications disabled.")
+                logging.warning("notify-send not found, notifications disabled.", exc_info=True)
         except Exception as e:
             self.notifications_enabled = False
-            logging.warning(f"Notification setup failed: {e}")
+            logging.warning(f"Notification setup failed: {e}", exc_info=True)
 
     def send_notification(self, title, message, icon="audio-headphones", urgency="normal", timeout=5000):
         if not self.notifications_enabled:
@@ -35,4 +35,4 @@ class NotificationManager:
             ]
             subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
-            logging.warning(f"Notification failed: {e}")
+            logging.warning(f"Notification failed: {e}", exc_info=True)

@@ -1,6 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import logging
+from .launch_spotify import launch_spotify
 
 class SpotifyController:
     def __init__(self, client_id, client_secret, redirect_uri, cache_path, notifier=None):
@@ -22,7 +23,69 @@ class SpotifyController:
             results = self.spotify.search(q=song_name, type='track', limit=3)
             if results['tracks']['items']:
                 track = results['tracks']['items'][0]
-                self.spotify.start_playback(uris=[track['uri']])
+                try:
+                    self.spotify.start_playback(uris=[track['uri']])
+                except spotipy.SpotifyException as e:
+                    if 'No active device' in str(e):
+                        if self.notifier:
+                            self.notifier.send_notification(
+                                "❌ Spotify Not Running",
+                                "Spotify is not running on any device. Launching Spotify on this device...",
+                                "dialog-warning",
+                                "normal",
+                                5000
+                            )
+                        if launch_spotify():
+                            import time
+                            # Poll for device readiness (up to 3 seconds, check every 0.3s)
+                            device_id = None
+                            for _ in range(10):
+                                devices = self.spotify.devices()
+                                for d in devices.get('devices', []):
+                                    if d.get('is_active') or d.get('type') == 'Computer':
+                                        device_id = d['id']
+                                        break
+                                if device_id:
+                                    break
+                                time.sleep(0.3)
+                            if device_id:
+                                try:
+                                    self.spotify.transfer_playback(device_id, force_play=True)
+                                    # Wait briefly for transfer, then play requested song
+                                    time.sleep(0.5)
+                                    self.spotify.start_playback(uris=[track['uri']], device_id=device_id)
+                                except Exception as e2:
+                                    if self.notifier:
+                                        self.notifier.send_notification(
+                                            "❌ Playback Error",
+                                            f"Failed to play after launching and transferring: {song_name}",
+                                            "dialog-error"
+                                        )
+                                    return
+                            else:
+                                if self.notifier:
+                                    self.notifier.send_notification(
+                                        "❌ Device Not Found",
+                                        "Could not find a Spotify device to transfer playback.",
+                                        "dialog-error"
+                                    )
+                                return
+                        else:
+                            if self.notifier:
+                                self.notifier.send_notification(
+                                    "❌ Spotify Launch Failed",
+                                    "Could not launch Spotify desktop app. Please start it manually.",
+                                    "dialog-error"
+                                )
+                            return
+                    else:
+                        if self.notifier:
+                            self.notifier.send_notification(
+                                "❌ Playback Error",
+                                f"Failed to play: {song_name}",
+                                "dialog-error"
+                            )
+                        return
                 if self.notifier:
                     self.notifier.send_notification(
                         "🎵 Now Playing (Enhanced)",
@@ -50,7 +113,67 @@ class SpotifyController:
 
     def resume_playback(self):
         try:
-            self.spotify.start_playback()
+            try:
+                self.spotify.start_playback()
+            except spotipy.SpotifyException as e:
+                if 'No active device' in str(e):
+                    if self.notifier:
+                        self.notifier.send_notification(
+                            "❌ Spotify Not Running",
+                            "Spotify is not running on any device. Launching Spotify on this device...",
+                            "dialog-warning",
+                            "normal",
+                            5000
+                        )
+                    if launch_spotify():
+                        import time
+                        device_id = None
+                        for _ in range(10):
+                            devices = self.spotify.devices()
+                            for d in devices.get('devices', []):
+                                if d.get('is_active') or d.get('type') == 'Computer':
+                                    device_id = d['id']
+                                    break
+                            if device_id:
+                                break
+                            time.sleep(0.3)
+                        if device_id:
+                            try:
+                                self.spotify.transfer_playback(device_id, force_play=True)
+                                time.sleep(0.5)
+                                self.spotify.start_playback(device_id=device_id)
+                            except Exception as e2:
+                                if self.notifier:
+                                    self.notifier.send_notification(
+                                        "❌ Playback Error",
+                                        "Failed to resume after launching and transferring.",
+                                        "dialog-error"
+                                    )
+                                return
+                        else:
+                            if self.notifier:
+                                self.notifier.send_notification(
+                                    "❌ Device Not Found",
+                                    "Could not find a Spotify device to transfer playback.",
+                                    "dialog-error"
+                                )
+                            return
+                    else:
+                        if self.notifier:
+                            self.notifier.send_notification(
+                                "❌ Spotify Launch Failed",
+                                "Could not launch Spotify desktop app. Please start it manually.",
+                                "dialog-error"
+                            )
+                        return
+                else:
+                    if self.notifier:
+                        self.notifier.send_notification(
+                            "❌ Playback Error",
+                            "Failed to resume playback.",
+                            "dialog-error"
+                        )
+                    return
             if self.notifier:
                 self.notifier.send_notification(
                     "▶️ Playback Resumed",

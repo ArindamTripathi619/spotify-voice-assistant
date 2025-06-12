@@ -21,7 +21,7 @@ A sophisticated Linux-native voice-controlled Spotify assistant with **wake word
 1. 😴 **Sleeping**: App listens only for "jarvis"
 2. 👂 **Awakened**: Say "jarvis" to activate
 3. 🎵 **Command**: Speak your full command ("play Hotel California by Eagles")
-4. ✅ **Execute**: Song plays, app returns to sleep
+4. ✅ **Execute**: Song plays (if Spotify is not running, the assistant will launch it and play your song automatically), app returns to sleep
 5. 🔄 **Repeat**: No interruptions while you enjoy music
 
 **Smart Timeouts:**
@@ -99,8 +99,8 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8080/callback
 
 
 ```bash
-# Make sure Spotify is running
-spotify &
+# You do NOT need to manually start Spotify!
+# The assistant will launch Spotify automatically if needed (supports Flatpak and native installs)
 
 # Start the enhanced assistant (from project root)
 python -m app.main
@@ -212,8 +212,9 @@ pip install --force-reinstall pyaudio
 ```
 
 **3. "No active device found"**
-- Ensure Spotify is running and logged in
-- Start playing something in Spotify first
+- The assistant now automatically launches Spotify if it is not running (supports Flatpak and native installs)
+- If Spotify was just launched, the assistant will transfer playback to your computer and play your requested song—no manual interaction needed
+- If you still see this error, check that Spotify is installed and can be launched from the terminal with `spotify` or `flatpak run com.spotify.Client`
 - Check Spotify Connect devices
 
 **4. Speech recognition fails**

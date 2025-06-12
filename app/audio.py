@@ -46,11 +46,12 @@ class AudioManager:
 
     def select_best_microphone(self):
         mic_list = sr.Microphone.list_microphone_names()
+        sample_rate = 44100  # Match typical output device sample rate
         try:
-            self.microphone = sr.Microphone()
+            return sr.Microphone(sample_rate=sample_rate)
         except Exception:
             if mic_list:
-                self.microphone = sr.Microphone(device_index=0)
+                return sr.Microphone(device_index=0, sample_rate=sample_rate)
             else:
                 raise RuntimeError("No microphones found.")
 
@@ -93,44 +94,50 @@ class AudioManager:
 
     def smart_calibration(self):
         saved_data = self.load_calibration_data()
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        mic = self.select_best_microphone()
         if saved_data:
-            self.recognizer.energy_threshold = saved_data['energy_threshold']
-            self.recognizer.pause_threshold = saved_data['pause_threshold']
+            recognizer.energy_threshold = saved_data['energy_threshold']
+            recognizer.pause_threshold = saved_data['pause_threshold']
             try:
-                with self.microphone as source:
-                    self.recognizer.adjust_for_ambient_noise(source, duration=2)
+                with mic as source:
+                    recognizer.adjust_for_ambient_noise(source, duration=2)
             except Exception as e:
                 logging.warning(f"Ambient adjustment failed: {e}")
         else:
             self.enhanced_calibration()
 
     def enhanced_calibration(self):
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        mic = self.select_best_microphone()
         try:
-            with self.microphone as source:
-                self.recognizer.adjust_for_ambient_noise(source, duration=4)
-            initial_threshold = self.recognizer.energy_threshold
+            with mic as source:
+                recognizer.adjust_for_ambient_noise(source, duration=4)
+            initial_threshold = recognizer.energy_threshold
             try:
-                with self.microphone as source:
-                    audio = self.recognizer.listen(source, timeout=8, phrase_time_limit=15)
-                    test_result = self.recognizer.recognize_google(audio, language='en-US')
+                with mic as source:
+                    audio = recognizer.listen(source, timeout=8, phrase_time_limit=15)
+                    test_result = recognizer.recognize_google(audio, language='en-US')
                 if len(test_result.split()) >= 3:
                     pass
                 else:
-                    self.recognizer.energy_threshold = max(150, self.recognizer.energy_threshold * 0.8)
+                    recognizer.energy_threshold = max(150, recognizer.energy_threshold * 0.8)
             except Exception:
-                self.recognizer.energy_threshold = 250
-                self.recognizer.pause_threshold = 3.5
+                recognizer.energy_threshold = 250
+                recognizer.pause_threshold = 3.5
             self.save_calibration_data(
-                self.recognizer.energy_threshold,
-                self.recognizer.pause_threshold,
+                recognizer.energy_threshold,
+                recognizer.pause_threshold,
                 success_rate=1.0
             )
         except Exception as e:
-            self.recognizer.energy_threshold = 300
-            self.recognizer.pause_threshold = 4.0
+            recognizer.energy_threshold = 300
+            recognizer.pause_threshold = 4.0
             self.save_calibration_data(
-                self.recognizer.energy_threshold,
-                self.recognizer.pause_threshold,
+                recognizer.energy_threshold,
+                recognizer.pause_threshold,
                 success_rate=0.3
             )
 
@@ -151,31 +158,38 @@ class AudioManager:
             return thread
 
     def listen_for_command(self, timeout=3):
+        import speech_recognition as sr
         try:
-            with self.microphone as source:
-                self.recognizer.adjust_for_ambient_noise(source, duration=0.2)
-                audio = self.recognizer.listen(
+            recognizer = sr.Recognizer()
+            mic = self.select_best_microphone()
+            with mic as source:
+                recognizer.adjust_for_ambient_noise(source, duration=0.2)
+                audio = recognizer.listen(
                     source,
                     timeout=timeout,
                     phrase_time_limit=7
                 )
             command = None
             try:
-                command = self.recognizer.recognize_google(audio, language='en-US').lower()
+                command = recognizer.recognize_google(audio, language='en-US').lower()
                 self.success_count += 1
+                del recognizer
+                del mic
                 return command
             except sr.UnknownValueError:
                 pass
             except sr.RequestError:
                 pass
             try:
-                command = self.recognizer.recognize_google(audio, language='en-GB').lower()
+                command = recognizer.recognize_google(audio, language='en-GB').lower()
                 self.success_count += 1
+                del recognizer
+                del mic
                 return command
             except:
                 pass
             try:
-                results = self.recognizer.recognize_google(audio, language='en-US', show_all=True)
+                results = recognizer.recognize_google(audio, language='en-US', show_all=True)
                 if results and 'alternative' in results:
                     alternatives = results['alternative']
                     if alternatives:
@@ -183,10 +197,14 @@ class AudioManager:
                         confidence = alternatives[0].get('confidence', 0)
                         if confidence > 0.3:
                             self.success_count += 1
+                            del recognizer
+                            del mic
                             return command
             except:
                 pass
             self.adjust_sensitivity()
+            del recognizer
+            del mic
             return None
         except sr.WaitTimeoutError:
             return None
@@ -197,16 +215,21 @@ class AudioManager:
             self.attempt_count += 1
 
     def listen_for_wake_word(self):
+        import speech_recognition as sr
         try:
-            with self.microphone as source:
-                self.recognizer.adjust_for_ambient_noise(source, duration=0.2)
-                audio = self.recognizer.listen(
+            recognizer = sr.Recognizer()
+            mic = self.select_best_microphone()
+            with mic as source:
+                recognizer.adjust_for_ambient_noise(source, duration=0.2)
+                audio = recognizer.listen(
                     source,
                     timeout=30,
                     phrase_time_limit=5
                 )
             try:
-                recognized_text = self.recognizer.recognize_google(audio, language='en-US').lower()
+                recognized_text = recognizer.recognize_google(audio, language='en-US').lower()
+                del recognizer
+                del mic
                 if self.wake_word.lower() in recognized_text:
                     return True
                 else:

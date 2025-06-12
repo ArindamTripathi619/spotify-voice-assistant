@@ -64,10 +64,7 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8080/callback
 
 ### Step 4: Start Spotify
 
-```bash
-spotify &
-# Or start Spotify through your DE/launcher
-```
+> **Note:** You do NOT need to manually start Spotify! The assistant will launch Spotify automatically if needed (supports Flatpak and native installs).
 
 ### Step 5: Run Enhanced Assistant
 

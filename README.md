@@ -2,11 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
 
-A sophisticated Linux-native voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Now fully modularized for maintainability and clarity.
+A sophisticated **cross-platform** voice-controlled Spotify assistant with **wake word detection**, **persistent voice calibration**, and **background mode support**. Now fully modularized for maintainability and clarity.
 
-> **Now works seamlessly on most major Linux distributions and desktop environments (GNOME, KDE, XFCE, i3, Sway, Hyprland, and more).**
+> **Now works seamlessly on Windows, Linux, and macOS with support for major desktop environments (GNOME, KDE, XFCE, i3, Sway, Hyprland, and more).**
 >
-> **Universal, interactive setup script included!**
+> **Universal, interactive setup scripts included for all platforms!**
 
 ## ✨ Key Features
 
@@ -59,21 +59,40 @@ Type 'recalibrate' → Redo voice setup
 
 ### 1. Install Dependencies
 
-**Arch Linux (Automated):**
+**Windows (Automated):**
+```batch
+# Download and run Windows setup
+setup_windows.bat
+# Or use PowerShell:
+.\setup_windows.ps1
+```
+
+**Linux (Automated):**
 ```bash
 chmod +x setup.sh
 ./setup.sh
+# Or universal script:
+chmod +x universal_setup.sh
+./universal_setup.sh
 ```
 
 **Manual Installation:**
 ```bash
-# Arch Linux
+# Windows
+pip install -r requirements.txt
+pip install plyer win10toast  # For enhanced notifications
+
+# Linux (Arch)
 sudo pacman -S python python-pip portaudio espeak-ng alsa-utils pulseaudio libnotify
 
-# Ubuntu/Debian
+# Linux (Ubuntu/Debian)
 sudo apt install python3 python3-pip portaudio19-dev espeak-ng libnotify-bin
 
-# Install Python packages
+# macOS
+brew install portaudio
+pip install -r requirements.txt
+
+# Install Python packages (all platforms)
 pip install -r requirements.txt
 ```
 

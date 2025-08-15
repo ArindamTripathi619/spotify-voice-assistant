@@ -1,21 +1,6 @@
-import subprocess
-import sys
+# Cross-platform Spotify launcher
+# Automatically detects platform and uses appropriate launch method
+from .launch_spotify_cross_platform import launch_spotify, check_spotify_installation
 
-def launch_spotify():
-    """Launch Spotify desktop app on Linux. Try native, then Flatpak."""
-    try:
-        subprocess.Popen(["spotify"])
-        return True
-    except FileNotFoundError:
-        # Try Flatpak
-        try:
-            subprocess.Popen(["flatpak", "run", "com.spotify.Client"])
-            return True
-        except FileNotFoundError:
-            return False
-        except Exception as e:
-            print(f"Error launching Spotify via Flatpak: {e}")
-            return False
-    except Exception as e:
-        print(f"Error launching Spotify: {e}")
-        return False
+# For backward compatibility, keep the original function name
+# This file now acts as a compatibility wrapper

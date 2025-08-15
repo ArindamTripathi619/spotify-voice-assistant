@@ -1,0 +1,44 @@
+# Enhanced Spotify Voice Assistant - Cross-Platform Requirements
+# Core dependencies that work on all platforms
+
+# Spotify and audio processing
+spotipy==2.22.1
+SpeechRecognition==3.14.3
+pyttsx3==2.90
+
+# Environment and utilities
+python-dotenv==1.0.0
+colorama==0.4.6
+
+# Cross-platform system utilities
+psutil==5.9.8
+
+# Audio input/output (cross-platform)
+# Note: PyAudio installation varies by platform
+# Windows: pip install pyaudio (may need Visual C++ Build Tools)
+# Linux: Install portaudio19-dev first, then pip install pyaudio  
+# macOS: brew install portaudio, then pip install pyaudio
+pyaudio==0.2.11
+
+# Cross-platform notifications (optional, for better Windows support)
+# Uncomment these for enhanced notification support:
+# plyer==2.1.0          # Cross-platform notifications
+# win10toast==0.9       # Windows-specific toast notifications (Windows only)
+
+# Platform detection and utilities
+# These are built-in Python modules, listed here for documentation:
+# platform (built-in)
+# subprocess (built-in)
+# os (built-in)
+# sys (built-in)
+
+# Windows-specific optional dependencies (install manually on Windows):
+# pip install plyer win10toast
+
+# Linux-specific system dependencies (install via system package manager):
+# Arch: sudo pacman -S portaudio espeak-ng alsa-utils pulseaudio libnotify
+# Ubuntu/Debian: sudo apt install portaudio19-dev espeak-ng libnotify-bin
+# Fedora: sudo dnf install portaudio-devel espeak-ng libnotify
+
+# macOS-specific dependencies:
+# brew install portaudio

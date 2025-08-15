@@ -1,4 +1,4 @@
-# Enhanced Spotify Voice Assistant Dependencies
+# Enhanced Spotify Voice Assistant Dependencies - Cross-Platform
 # Core Spotify and audio processing
 spotipy==2.22.1
 SpeechRecognition==3.14.3
@@ -8,7 +8,17 @@ pyaudio==0.2.11
 # Environment and utilities
 python-dotenv==1.0.0
 colorama==0.4.6
+psutil==5.9.8
+
+# Cross-platform notifications (optional - for better Windows/macOS support)
+# Install these for enhanced cross-platform notifications:
+# pip install plyer win10toast
 
 # Note: Wake word detection is now built-in using speech recognition
 # No external wake word library needed (pvporcupine removed)
+
+# Platform-specific installation notes:
+# Windows: May need Visual C++ Build Tools for PyAudio
+# Linux: Install portaudio19-dev first, then pip install pyaudio
+# macOS: brew install portaudio, then pip install pyaudio
 

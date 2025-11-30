@@ -5,6 +5,7 @@ from .spotify_control import SpotifyController
 from .audio import AudioManager
 from .notifications import NotificationManager
 from .utils import load_environment
+from .error_handling import ErrorHandler, ConfigurationError, error_handler, ErrorCategory, ErrorSeverity
 
 # Set up rotating log handler (1MB per file, keep 5 backups)
 log_dir = os.path.join(os.path.dirname(__file__), '../logs')
@@ -20,6 +21,13 @@ class EnhancedVoiceAssistant:
     def __init__(self):
         load_environment()
         self.notifier = NotificationManager()
+        
+        # Initialize error handler
+        self.error_handler = ErrorHandler(logging.getLogger(__name__), self.notifier)
+        
+        # Validate required environment variables at startup
+        self._validate_environment()
+        
         self.calibration_file = os.path.join(os.path.dirname(__file__), '../calibration/.voice_calibration.json')
         self.wake_word = os.getenv('WAKE_WORD', 'jarvis')
         self.audio_manager = AudioManager(
@@ -34,9 +42,51 @@ class EnhancedVoiceAssistant:
             cache_path=os.path.join(os.path.dirname(__file__), '../cache/.spotify_cache'),
             notifier=self.notifier
         )
+        
+        # Error handler will be used directly in assistant methods
+
+    def _validate_environment(self):
+        """Validate required environment variables at startup."""
+        required_vars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET']
+        missing_vars = []
+        
+        for var in required_vars:
+            value = os.getenv(var)
+            if not value or value.strip() == '':
+                missing_vars.append(var)
+        
+        if missing_vars:
+            error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
+            logging.error(error_msg)
+            
+            # Show helpful setup message
+            setup_msg = (
+                "Please set up your Spotify credentials:\n"
+                "1. Go to https://developer.spotify.com/dashboard\n"
+                "2. Create an app and get your Client ID and Secret\n"
+                "3. Set environment variables or create .env file:\n"
+                f"   {' | '.join(f'{var}=your_value' for var in missing_vars)}"
+            )
+            logging.error(setup_msg)
+            
+            if self.notifier:
+                self.notifier.send_notification(
+                    "⚠️ Configuration Error", 
+                    f"Missing Spotify credentials: {', '.join(missing_vars)}", 
+                    "dialog-error", 
+                    "critical", 
+                    0
+                )
+            
+            raise EnvironmentError(f"{error_msg}\n\n{setup_msg}")
         self.is_running = True
         self.is_awake = False
         self.switch_to_text_mode = False  # Flag for switching to text mode
+        
+        # Add thread safety for signal handlers
+        import threading
+        self._lock = threading.Lock()
+        
         logging.info("EnhancedVoiceAssistant initialized.")
 
     def run(self):
@@ -51,10 +101,12 @@ class EnhancedVoiceAssistant:
         )
         def handle_sigterm(signum, frame):
             logging.info(f"Received shutdown signal ({signum}). Shutting down gracefully.")
-            self.is_running = False
+            with self._lock:
+                self.is_running = False
         def handle_sigint(signum, frame):
             logging.info("SIGINT received: switching to text mode.")
-            self.switch_to_text_mode = True
+            with self._lock:
+                self.switch_to_text_mode = True
         signal.signal(signal.SIGTERM, handle_sigterm)
         signal.signal(signal.SIGINT, handle_sigint)
         try:
@@ -89,7 +141,23 @@ class EnhancedVoiceAssistant:
                 else:
                     self.is_awake = False
         except Exception as e:
-            logging.exception(f"Error in main loop (wake_word={self.wake_word}, is_running={self.is_running}, is_awake={self.is_awake}):")
+            logging.exception(f"Critical error in main loop: {e}")
+            self.notifier.send_notification("💥 Assistant Error", f"Fatal error: {str(e)[:50]}...", "dialog-error", "critical", 10000)
+            self._cleanup_resources()  # Add proper cleanup method
+            raise  # Re-raise for proper error handling
+        finally:
+            self._cleanup_resources()
+
+    def _cleanup_resources(self):
+        """Cleanup resources when shutting down."""
+        try:
+            if hasattr(self.audio_manager, 'cleanup'):
+                self.audio_manager.cleanup()
+            if hasattr(self.spotify_controller, 'cleanup'):
+                self.spotify_controller.cleanup()
+            logging.info("Resources cleaned up successfully")
+        except Exception as e:
+            logging.warning(f"Error during cleanup: {e}")
 
     def text_mode_loop(self):
         print("\n📝 TEXT MODE: Type commands or 'voice' to return to voice mode")
@@ -168,35 +236,39 @@ class EnhancedVoiceAssistant:
             print(f"  {tip}")
 
     def process_command(self, command):
-        command = command.lower().strip()
-        if 'play' in command and len(command.split()) > 1:
-            song_name = command.split('play', 1)[1].strip()
-            song_name = song_name.replace('the song', '').strip()
-            song_name = song_name.replace('song called', '').strip()
-            song_name = song_name.replace('track', '').strip()
-            if song_name:
-                self.spotify_controller.play_song(song_name)
-                return
-        if any(word in command for word in ['play', 'start', 'resume', 'go']):
-            self.spotify_controller.resume_playback()
-        elif any(word in command for word in ['pause', 'stop', 'halt']):
-            self.spotify_controller.pause_playback()
-        elif any(word in command for word in ['next', 'skip', 'forward']):
-            self.spotify_controller.next_track()
-        elif any(word in command for word in ['previous', 'back', 'last']):
-            self.spotify_controller.previous_track()
-        elif 'volume up' in command or 'louder' in command or 'turn up' in command:
-            self.spotify_controller.adjust_volume(15)
-        elif 'volume down' in command or 'quieter' in command or 'turn down' in command:
-            self.spotify_controller.adjust_volume(-15)
-        elif any(word in command for word in ['what', 'playing', 'current', 'now']):
-            self.spotify_controller.get_current_track()
-        elif any(word in command for word in ['quit', 'exit', 'bye', 'goodbye']):
-            self.notifier.send_notification(
-                "👋 Enhanced Assistant Stopping",
-                "Enhanced Spotify Voice Assistant is shutting down",
-                "application-exit",
-                "low",
-                3000
-            )
-            self.is_running = False
+        """Process voice commands with comprehensive error handling."""
+        try:
+            command = command.lower().strip()
+            if 'play' in command and len(command.split()) > 1:
+                song_name = command.split('play', 1)[1].strip()
+                song_name = song_name.replace('the song', '').strip()
+                song_name = song_name.replace('song called', '').strip()
+                song_name = song_name.replace('track', '').strip()
+                if song_name:
+                    self.spotify_controller.play_song(song_name)
+                    return
+            if any(word in command for word in ['play', 'start', 'resume', 'go']):
+                self.spotify_controller.resume_playback()
+            elif any(word in command for word in ['pause', 'stop', 'halt']):
+                self.spotify_controller.pause_playback()
+            elif any(word in command for word in ['next', 'skip', 'forward']):
+                self.spotify_controller.next_track()
+            elif any(word in command for word in ['previous', 'back', 'last']):
+                self.spotify_controller.previous_track()
+            elif 'volume up' in command or 'louder' in command or 'turn up' in command:
+                self.spotify_controller.adjust_volume(15)
+            elif 'volume down' in command or 'quieter' in command or 'turn down' in command:
+                self.spotify_controller.adjust_volume(-15)
+            elif any(word in command for word in ['what', 'playing', 'current', 'now']):
+                self.spotify_controller.get_current_track()
+            elif any(word in command for word in ['quit', 'exit', 'bye', 'goodbye']):
+                self.notifier.send_notification(
+                    "👋 Enhanced Assistant Stopping",
+                    "Enhanced Spotify Voice Assistant is shutting down",
+                    "application-exit",
+                    "low",
+                    3000
+                )
+                self.is_running = False
+        except Exception as e:
+            self.error_handler.handle_error(e, f"Failed to process command: {command}")

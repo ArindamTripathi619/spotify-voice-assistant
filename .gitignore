@@ -9,6 +9,8 @@ cache/
 # IDE and workspace files
 *.code-workspace
 .vscode/
+.github/
+docs/
 .idea/
 *.swp
 *.swo

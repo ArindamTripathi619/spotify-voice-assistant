@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Universal Setup Script for Enhanced Spotify Voice Assistant
+# Automatically detects platform and runs appropriate setup
+
+set -e
+
+# Banner
+echo -e "\n🎤 Enhanced Spotify Voice Assistant - Universal Setup"
+echo "✨ Cross-platform setup with automatic platform detection"
+echo
+
+# Detect platform
+detect_platform() {
+    case "$(uname -s)" in
+        Linux*)
+            if command -v wsl.exe >/dev/null 2>&1; then
+                echo "wsl"
+            else
+                echo "linux"
+            fi
+            ;;
+        Darwin*)
+            echo "macos"
+            ;;
+        CYGWIN*|MINGW*|MSYS*)
+            echo "windows"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
+}
+
+PLATFORM=$(detect_platform)
+echo "🔍 Detected platform: $PLATFORM"
+
+# Run platform-specific setup
+case "$PLATFORM" in
+    linux|wsl)
+        echo "📦 Running Linux setup..."
+        if [ -f "universal_setup.sh" ]; then
+            chmod +x universal_setup.sh
+            ./universal_setup.sh "$@"
+        else
+            echo "❌ universal_setup.sh not found!"
+            exit 1
+        fi
+        ;;
+    macos)
+        echo "📦 Running macOS setup..."
+        if [ -f "setup_macos.sh" ]; then
+            chmod +x setup_macos.sh
+            ./setup_macos.sh "$@"
+        else
+            echo "⚠️  macOS setup not implemented yet. Using universal Linux setup..."
+            if [ -f "universal_setup.sh" ]; then
+                chmod +x universal_setup.sh
+                ./universal_setup.sh "$@"
+            fi
+        fi
+        ;;
+    windows)
+        echo "📦 Running Windows setup..."
+        if [ -f "setup_windows.ps1" ]; then
+            powershell.exe -ExecutionPolicy Bypass -File setup_windows.ps1
+        elif [ -f "setup_windows.bat" ]; then
+            cmd.exe /c setup_windows.bat
+        else
+            echo "❌ No Windows setup script found!"
+            exit 1
+        fi
+        ;;
+    *)
+        echo "❌ Unsupported platform: $PLATFORM"
+        echo "Please run the appropriate setup script manually:"
+        echo "  Linux: ./universal_setup.sh"
+        echo "  Windows: setup_windows.ps1 or setup_windows.bat"
+        exit 1
+        ;;
+esac
+
+echo
+echo "🎉 Platform-specific setup completed!"
+echo "📚 For detailed instructions, see README.md"

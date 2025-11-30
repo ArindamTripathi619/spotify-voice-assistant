@@ -1,0 +1,30 @@
+{
+  "wake_word": "jarvis",
+  "log_level": "INFO",
+  "cache_dir": "../cache",
+  "log_dir": "../logs",
+  "calibration_dir": "../calibration",
+  "audio": {
+    "energy_threshold": 200,
+    "pause_threshold": 1.0,
+    "phrase_time_limit": 7.0,
+    "sample_rate": 44100,
+    "max_retries": 3,
+    "api_rate_limit_calls_per_minute": 45,
+    "calibration_duration": 0.2
+  },
+  "spotify": {
+    "client_id": "",
+    "client_secret": "",
+    "redirect_uri": "http://127.0.0.1:8080/callback",
+    "api_rate_limit_calls_per_second": 6,
+    "device_poll_timeout": 3.0,
+    "max_device_retries": 10
+  },
+  "notifications": {
+    "enabled": true,
+    "default_timeout": 5000,
+    "default_icon": "audio-headphones",
+    "default_urgency": "normal"
+  }
+}

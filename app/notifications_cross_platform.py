@@ -90,21 +90,42 @@ class CrossPlatformNotificationManager:
                 self.notifications_enabled = False
 
     def send_notification(self, title, message, icon="audio-headphones", urgency="normal", timeout=5000):
-        """Send cross-platform notification."""
+        """Send cross-platform notification with fallback support."""
         if not self.notifications_enabled:
+            # Final fallback to console output
+            print(f"NOTIFICATION: {title} - {message}")
             return
 
-        try:
-            if self.notification_backend == 'win10toast':
-                self._send_windows_toast(title, message, timeout)
-            elif self.notification_backend == 'plyer':
-                self._send_plyer_notification(title, message, timeout)
-            elif self.notification_backend == 'notify-send':
-                self._send_linux_notification(title, message, icon, urgency, timeout)
-            elif self.notification_backend == 'osascript':
-                self._send_mac_notification(title, message)
-        except Exception as e:
-            logging.warning(f"Failed to send notification: {e}")
+        # Try primary backend first
+        backends_to_try = [self.notification_backend]
+        
+        # Add fallback backends
+        if self.notification_backend != 'plyer' and hasattr(self, 'plyer_notification'):
+            backends_to_try.append('plyer')
+        
+        for backend in backends_to_try:
+            try:
+                if self._try_send_with_backend(backend, title, message, icon, urgency, timeout):
+                    return
+            except Exception as e:
+                logging.warning(f"Notification backend {backend} failed: {e}")
+        
+        # Final fallback to console
+        print(f"NOTIFICATION: {title} - {message}")
+
+    def _try_send_with_backend(self, backend, title, message, icon, urgency, timeout):
+        """Try to send notification with specific backend."""
+        if backend == 'win10toast':
+            self._send_windows_toast(title, message, timeout)
+        elif backend == 'plyer':
+            self._send_plyer_notification(title, message, timeout)
+        elif backend == 'notify-send':
+            self._send_linux_notification(title, message, icon, urgency, timeout)
+        elif backend == 'osascript':
+            self._send_mac_notification(title, message)
+        else:
+            return False
+        return True
 
     def _send_windows_toast(self, title, message, timeout):
         """Send Windows toast notification."""
@@ -151,14 +172,22 @@ class CrossPlatformNotificationManager:
             logging.warning(f"Linux notification failed: {e}")
 
     def _send_mac_notification(self, title, message):
-        """Send macOS notification using osascript."""
+        """Send macOS notification using osascript with proper input validation."""
         import subprocess
+        import shlex
         try:
-            script = f'''
-            display notification "{message}" with title "{title}" sound name "default"
-            '''
-            subprocess.run(['osascript', '-e', script], capture_output=True)
-        except Exception as e:
+            # Validate and sanitize inputs to prevent command injection
+            safe_title = str(title)[:100]  # Limit length
+            safe_message = str(message)[:300]  # Limit length
+            
+            # Escape quotes and special characters for AppleScript
+            safe_title = safe_title.replace('"', '\\"').replace('\n', ' ').replace('\r', ' ')
+            safe_message = safe_message.replace('"', '\\"').replace('\n', ' ').replace('\r', ' ')
+            
+            # Use array format for subprocess to prevent injection
+            script = f'display notification "{safe_message}" with title "{safe_title}" sound name "default"'
+            subprocess.run(['osascript', '-e', script], capture_output=True, timeout=5)
+        except (subprocess.TimeoutExpired, Exception) as e:
             logging.warning(f"macOS notification failed: {e}")
 
 # For backward compatibility, alias to the cross-platform version

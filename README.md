@@ -57,22 +57,27 @@ Type 'recalibrate' → Redo voice setup
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Universal Setup (Recommended)
 
-**Windows (Automated):**
-```batch
-# Download and run Windows setup
-setup_windows.bat
-# Or use PowerShell:
-.\setup_windows.ps1
+**Automatic Setup (All Platforms):**
+```bash
+# One command setup - detects your platform automatically
+chmod +x setup && ./setup
 ```
 
-**Linux (Automated):**
+### 2. Platform-Specific Setup
+
+**Windows:**
+```batch
+# PowerShell (Recommended):
+setup_windows.ps1
+# Or Command Prompt:
+setup_windows.bat
+```
+
+**Linux:**
 ```bash
-chmod +x setup.sh
-./setup.sh
-# Or universal script:
-chmod +x universal_setup.sh
+# Multi-distribution support:
 ./universal_setup.sh
 ```
 

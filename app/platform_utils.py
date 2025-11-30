@@ -29,15 +29,20 @@ def get_spotify_executable_path():
             "C:\\Program Files (x86)\\Spotify\\Spotify.exe"
         ]
         
-        # Check Windows Store version
+        # Check Windows Store version with proper error handling
         try:
-            import winreg
+            import logging
             # Check if Spotify is installed via Windows Store
             store_path = "Microsoft\\WindowsApps\\Spotify.exe"
-            full_store_path = os.path.join(os.environ.get('LOCALAPPDATA', ''), store_path)
-            if os.path.exists(full_store_path):
-                possible_paths.insert(0, full_store_path)
-        except ImportError:
+            local_appdata = os.environ.get('LOCALAPPDATA')
+            if local_appdata:
+                full_store_path = os.path.join(local_appdata, store_path)
+                if os.path.exists(full_store_path) and os.access(full_store_path, os.X_OK):
+                    possible_paths.insert(0, full_store_path)
+        except (ImportError, OSError, KeyError) as e:
+            # Log the error but continue - this is not critical for functionality
+            import logging
+            logging.debug(f"Windows Store Spotify check failed: {e}")
             pass
         
         for path in possible_paths:
@@ -47,11 +52,24 @@ def get_spotify_executable_path():
         return None
     
     elif is_linux():
-        # Linux paths (existing logic)
-        if os.system("which spotify > /dev/null 2>&1") == 0:
+        # Linux paths - use safe subprocess instead of os.system()
+        import subprocess
+        import shutil
+        
+        # Safe executable detection using shutil.which
+        if shutil.which("spotify"):
             return "spotify"
-        elif os.system("flatpak list | grep -q com.spotify.Client") == 0:
-            return "flatpak run com.spotify.Client"
+        
+        # Safe flatpak detection with timeout
+        try:
+            result = subprocess.run(
+                ["flatpak", "list", "--app", "--columns=application"],
+                capture_output=True, text=True, timeout=5
+            )
+            if "com.spotify.Client" in result.stdout:
+                return "flatpak run com.spotify.Client"
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+            pass
         return None
     
     elif is_mac():
@@ -116,13 +134,15 @@ def get_audio_requirements():
 def setup_platform_environment():
     """Perform platform-specific environment setup."""
     if is_windows():
-        # Windows-specific setup
-        import ctypes
+        # Windows-specific setup - only available on Windows
         try:
-            # Enable ANSI color codes in Windows terminal
-            kernel32 = ctypes.windll.kernel32
-            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-        except:
+            import ctypes
+            # Enable ANSI color codes in Windows terminal (Windows only)
+            if sys.platform == "win32":
+                kernel32 = ctypes.windll.kernel32  # type: ignore
+                kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+        except (ImportError, AttributeError, OSError):
+            # Silently fail if not available - this is not critical
             pass
     
     elif is_linux():

@@ -10,7 +10,8 @@ cache/
 *.code-workspace
 .vscode/
 .github/
-docs/
+# NOTE: docs/ is deliberately NOT ignored — the project-context knowledge base is
+# tracked documentation and must ship with the repo. See docs/README.md.
 .idea/
 *.swp
 *.swo
